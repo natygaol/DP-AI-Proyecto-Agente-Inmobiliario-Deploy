@@ -12,6 +12,7 @@ Autor: Ing. Kevin Inofuente Colque - DataPath
 
 import os
 import re
+import traceback
 import unicodedata
 from typing import Optional
 
@@ -288,6 +289,8 @@ def consultar_total_inquilino(identificador: str) -> str:
             )
         return "\n".join(partes)
     except Exception as e:
+        print(f"   ❌ Google Sheets fallo: {e!r}")
+        traceback.print_exc()
         return f"Error al consultar Google Sheets: {str(e)}"
 
 
@@ -353,4 +356,6 @@ def consultar_desglose_inquilino(identificador: str) -> str:
 
         return "\n".join(partes)
     except Exception as e:
+        print(f"   ❌ Google Sheets fallo: {e!r}")
+        traceback.print_exc()
         return f"Error al consultar Google Sheets: {str(e)}"
