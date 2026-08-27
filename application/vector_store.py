@@ -48,8 +48,13 @@ if not QDRANT_URL:
 # FUNCIONES PÚBLICAS
 # ============================================
 def get_embedding_model() -> OpenAIEmbeddings:
-    """Modelo de embeddings. El mismo para ingestar y para consultar."""
-    return OpenAIEmbeddings(model=MODELO_EMBEDDING)
+    """Modelo de embeddings. El mismo para ingestar y para consultar.
+
+    .strip() en la API key: el secreto en Secret Manager llega con un salto de
+    línea al final y httpx rechaza el header ("Illegal header value ...\\n").
+    """
+    api_key = (os.getenv("OPENAI_API_KEY") or "").strip()
+    return OpenAIEmbeddings(model=MODELO_EMBEDDING, api_key=api_key)
 
 
 def get_client() -> QdrantClient:
@@ -85,8 +90,13 @@ def get_vectorstore() -> QdrantVectorStore:
     """Vector store listo para consultar la colección del tenant."""
     client = get_client()
     ensure_collection(client)
+    # validate_collection_config=False: ensure_collection ya garantizó que la
+    # colección existe. La validación de langchain llama a OpenAI para medir la
+    # dimensión del vector, y no queremos que el arranque del contenedor dependa
+    # de una llamada de red a OpenAI.
     return QdrantVectorStore(
         client=client,
         collection_name=COLLECTION_NAME,
         embedding=get_embedding_model(),
+        validate_collection_config=False,
     )
