@@ -16,10 +16,14 @@ ENV PYTHONPATH=/usr/src/project/application
 # copy application code
 COPY ./application ./application
 
-EXPOSE 4000
+ENV PORT=8080
+
+EXPOSE 8080
 
 # FASTAPI / STREAMLIT
 #ENTRYPOINT ["streamlit", "run", "application/streamlit_page.py", "--server.port=4000", "--server.address=0.0.0.0"]
 
 # start the server
-CMD ["uvicorn", "main_chatwoot:app", "--host", "0.0.0.0", "--port", "4000", "--proxy-headers"]
+# Cloud Run inyecta la variable PORT (8080 por defecto). Usamos shell form para
+# expandirla; si no existe (local), cae a 4000.
+CMD uvicorn main_chatwoot:app --host 0.0.0.0 --port $PORT --proxy-headers
