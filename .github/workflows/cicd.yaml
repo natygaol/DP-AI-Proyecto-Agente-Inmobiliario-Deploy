@@ -1,9 +1,9 @@
 name: Deploy to Cloud Run
 
 env:
-  SERVICE_NAME: servicio-backend-agente-inmobiliaria-inofuente
-  PROJECT_ID: datapath-ai17-kevin-inofuente
-  DOCKER_IMAGE_URL: us-central1-docker.pkg.dev/datapath-ai17-kevin-inofuente/repositorio-backend-langchain-inmobiliaria/imagen-backend-langchain-inmobiliaria
+  SERVICE_NAME: datapath-17-agent-2026
+  PROJECT_ID: datapath-17-agent-2026
+  DOCKER_IMAGE_URL: us-central1-docker.pkg.dev/datapath-17-agent-2026/repositorio-backend-langgraph-multiagente/imagen-backend-langchain-inmobiliaria
 
 on:
   push:
@@ -47,4 +47,4 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
-            --service-account=langchain-agente-inmobiliaria@datapath-ai17-kevin-inofuente.iam.gserviceaccount.com
+            --service-account=deploy-datapath-agente-inmobil@datapath-17-agent-2026.iam.gserviceaccount.com
