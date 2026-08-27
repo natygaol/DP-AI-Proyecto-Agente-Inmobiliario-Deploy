@@ -24,9 +24,14 @@ load_dotenv(find_dotenv())
 # final; httpx rechaza el header ("Illegal header value ...\n") y toda llamada
 # a OpenAI falla con "Connection error.". Lo saneamos para TODOS los
 # consumidores (chat model, embeddings) antes de instanciar nada.
-for _k in ("OPENAI_API_KEY", "TAVILY_API_KEY", "QDRANT_API_KEY"):
-    if os.getenv(_k):
-        os.environ[_k] = os.environ[_k].strip()
+def _sanitizar_api_keys() -> None:
+    """Quita espacios/saltos de línea de las API keys en el entorno."""
+    for _k in ("OPENAI_API_KEY", "TAVILY_API_KEY", "QDRANT_API_KEY"):
+        if os.getenv(_k):
+            os.environ[_k] = os.environ[_k].strip()
+
+
+_sanitizar_api_keys()
 
 # Agregar el directorio actual al path para importar tools (portable para despliegue)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

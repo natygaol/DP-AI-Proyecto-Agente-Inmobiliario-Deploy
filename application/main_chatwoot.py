@@ -21,6 +21,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Importar directamente el agente (sin rutas locales)
 from agent import chat_con_agente, tools
+from conversation_history import get_session_history
+from scope_guard import REDIRECT_MESSAGE, formatear_historial, is_in_scope
 
 print("🤖 Cargando Agente Alpha State (Qdrant)...")
 print("✅ Agente Alpha State cargado correctamente")
@@ -181,14 +183,26 @@ async def chatwoot_webhook(request: Request):
         
         return {"status": "success", "action": "human_handoff"}
     
+    # Convertir conversation_id a UUID para el historial
+    session_id = conversation_id_to_uuid(conversation_id)
+
+    # Capa 2 del guardrail: clasificador de alcance antes de invocar al agente.
+    # Si el mensaje no es sobre el alquiler / Alpha State, redirige y no gasta
+    # un turno completo del agente (con tools).
+    try:
+        historial_reciente = formatear_historial(get_session_history(session_id).messages)
+    except Exception:
+        historial_reciente = ""
+    if not is_in_scope(message_content, historial_reciente):
+        print(f"   🚫 Fuera de alcance; redirijo sin invocar al agente")
+        send_chatwoot_message(conversation_id, REDIRECT_MESSAGE)
+        return {"status": "success", "action": "out_of_scope"}
+
     # Procesar con el agente
     try:
         print(f"   🤖 Procesando con el agente...")
-        
-        # Convertir conversation_id a UUID para el historial
-        session_id = conversation_id_to_uuid(conversation_id)
         print(f"   📝 Session ID: {session_id[:8]}...")
-        
+
         # Llamar al agente
         respuesta = chat_con_agente(message_content, session_id)
         
